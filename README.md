@@ -1,7 +1,7 @@
 # HTML-Generator
 The HTML Generator generates HTML Code that you can modify in a commandline interface.
 
-# _Commands_
+# Commands
 - title [title_str]
   > changes the title in the HTML Doc
 - char [charset] 
