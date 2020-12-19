@@ -2,6 +2,7 @@
 The HTML Generator generates HTML Code that you can modify in a commandline interface.
 
 # Commands 
+```
 - title [title_str]
   > changes the title in the HTML Doc
 - char [charset] 
@@ -12,4 +13,7 @@ The HTML Generator generates HTML Code that you can modify in a commandline inte
   > adds a default paragraph to the body part in the HTML Doc
 - bg [background-color]
   > adds a default background color to the body part in the HTML Doc
-
+  
+- say [output-text]
+  >
+```
