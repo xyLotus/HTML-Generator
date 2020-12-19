@@ -2,7 +2,6 @@
 The HTML Generator generates HTML Code that you can modify in a commandline interface.
 
 # Commands 
-```
 - title [title_str]
   > changes the title in the HTML Doc
 - char [charset] 
@@ -15,5 +14,9 @@ The HTML Generator generates HTML Code that you can modify in a commandline inte
   > adds a default background color to the body part in the HTML Doc
   
 - say [output-text]
-  >
-```
+  > outputs text in the commandline interface
+- cls
+  > clears console screen - Optional alt. to "clear"
+- clear 
+  > cleans console screen - alternative to "cls"
+
