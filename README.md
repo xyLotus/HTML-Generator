@@ -20,3 +20,5 @@ The HTML Generator generates HTML Code that you can modify in a commandline inte
 - clear 
   > cleans console screen - alternative to "cls"
 
+HTML Editing | Commandline Editing
+------------ | -------------------
