@@ -2,7 +2,7 @@
 
 ''' Change Log: 
 
-* 0.5
+* 0.5 (First-Release) 
     -- Beta Release -- 
     -- Base Core    -- 
     - added out statement   | Sets HTML Doc Default Paragraph
@@ -160,5 +160,4 @@ try:    # exit save, force save
     with open(save_to_file, 'w') as file:
         file.write(public_str)
 except FileNotFoundError as FNF:
-    print('Error')
     whitespace.error_out(FNF)
