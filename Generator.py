@@ -18,33 +18,49 @@
     - fixed background color bug
     
     -- Base Core Addition -- 
-    - added help statement  | Displays help screen 
+    - added help statement  | Displays help screen
+
+* 0.7
+    -- Core Changes -- 
+    - New Mode System released
+    - ^- Mode System contains CSS & HTML mode
+    - added switch statement | switches modes (HTML/CSS)
+    - added corresponding mode command storage -> AlphaCLS (HTML) - BetaCLS (CSS)
+
 '''
 
 __author__ = 'Lotus'
-__version__ = 0.6
+__version__ = 0.7
 
 import whitespace # Base Module - Excluded from Import-Check @ L6
 
 
 try: # Import-Checking 
     import os
-    import datetime
 except ImportError as ImportErr: 
     whitespace.important_error_out(ImportErr)
 
 
-# Basis HTML Attributes
-lang: str = ''
-charset: str = ''
-title: str = ''
-bg_color: str = 'white' # white == default
-default_statement: str = ''
+# Multi Layer Storage
+website_object_storage = []
 
-# Global Configurations
-default_statement_config: bool = False
 
-class Alpha: 
+class AlphaCLS: # Also for HTML Support
+    def __init__(self):
+        # Basis Commandline Editing Variables
+        self.commandline_mode: str = 'html' 
+        self.commandline_switch_count: int = 0
+        
+        # Basis HTML Attributes
+        self.lang: str = ''
+        self.charset: str = ''
+        self.title: str = ''
+        self.bg_color: str = 'white' # white == default
+        self.default_statement: str = ''
+
+        # Doc Configurations
+        self.default_statement_config: bool = False
+    
     # Commandline Editing
     def cmd_help(self): # displays help screen 
         print('''Commands: 
@@ -72,6 +88,16 @@ class Alpha:
     clear
         cleans console screen - alternative to "cls"''')              
 
+    def _force_exit(self): 
+        self.commandline_mode = 'EXIT' 
+
+    def cmd_switch(self):
+        self.commandline_switch_count += 1
+        if self.commandline_switch_count % 2 == 0: 
+            self.commandline_mode = 'html'
+        else: 
+            self.commandline_mode = 'css'
+
     def cmd_clear(self): # Optional Alt. to cls
         os.system('cls')
 
@@ -83,73 +109,110 @@ class Alpha:
 
     # HTML Editing
     def cmd_lang(self, value: str): # Set Language
-        global lang
-        lang = value
-        print(f'Language set to: {lang}') # Method Response
+        self.lang = value
+        print(f'Language set to: {self.lang}') # Method Response
     
     def cmd_char(self, value: str): # Set Charset
-        global charset
-        charset = value
-        print(f'Charset set to: {charset}') # Method Response
+        self.charset = value
+        print(f'Charset set to: {self.charset}') # Method Response
 
     def cmd_title(self, value: str): # Set Title
-        global title
-        title = value.replace('_', ' ')
-        print(f'Title set to: {title}') # Method Response
+        self.title = value.replace('_', ' ')
+        print(f'Title set to: {self.title}') # Method Response
 
     def cmd_bg(self, value: str): # Set Background Color
-        global bg_color
-        bg_color = value.lower()
-        print(f'Background Color set to: {bg_color}') # Method Response
+        self.bg_color = value.lower()
+        print(f'Background Color set to: {self.bg_color}') # Method Response
 
     def cmd_out(self, value: str): # Set Default Statement
-        global default_statement
-        global default_statement_config
-        default_statement_config = True
-        default_statement = value.replace('_', ' ')
-        print(f'Default Paragraph set to: {default_statement}')
+        self.default_statement_config = True
+        self.default_statement = value.replace('_', ' ')
+        print(f'Default Paragraph set to: {self.default_statement}')
 
 
-A = Alpha()
+A = AlphaCLS() # HTML Editing Instance Initialization
 
-class CMDL: # Commandline
+class BetaCLS: # CSS Entry Point
     def __init__(self, A): 
+        self.A = A
+
+    def cmd_switch(self):
+        return self.A.cmd_switch()
+
+    def cmd_help(self):
+        print('CMD METHOD')
+    
+    def _force_exit(self): 
+        self.A.commandline_mode = 'EXIT'
+
+
+B = BetaCLS(A=A) # CSS Editing Instance Initialization
+
+def commandline(mode: str, DockerCLS: object):
+    while A.commandline_mode == mode:
+        command = input(f'<{mode}> ').split()
+        try: 
+            if command[0].lower() in ['save', 'close', 'exit', 'quit']: 
+                return DockerCLS._force_exit()
+        except IndexError:
+            pass
+        try:
+        
+            base = command[0].lower()
+            argument= command[1]
+            getattr(DockerCLS, f'cmd_{base}')(argument)
+        except AttributeError as attrerr: 
+            whitespace.error_out(attrerr)
+        except IndexError:
+            try: 
+                base_cmd = command[0]
+                getattr(DockerCLS, f'cmd_{base_cmd}')()
+            except AttributeError as attrerr:
+                whitespace.error_out(attrerr)
+            except TypeError:
+                pass
+            except IndexError: 
+                pass
+
+
+# HTML Commandline == Commandline Entry Point
+class HTMLCMDL: # HTML Commandline and Commandset
+    def __init__(self, A: object): 
         self.A = A # Alpha Instance
 
-    def getl(self): # Main Commandline Method
-        while 1: # Main Input Loop
-            command = input('<cmd> ').split()
-            try:
-                if command[0] in ['save', 'close', 'exit', 'quit']:  
-                    break
-                base_cmd = command[0].lower()
-                arg = command[1]
-                getattr(self.A, f'cmd_{base_cmd}')(arg)
-            except AttributeError:
-                whitespace.error_out('Command Not Found')
-            except IndexError:
-                try: 
-                    base_cmd = command[0]
-                    getattr(self.A, f'cmd_{base_cmd}')()
-                except AttributeError:
-                    whitespace.error_out('Command Not Found')
-                except TypeError: 
-                    pass
-                except IndexError: 
-                    pass
+    def getl(self): 
+        commandline(mode='html', DockerCLS=A)
 
 
-CMDL = CMDL(A) # Commandline Initialization
-CMDL.getl()    # Method Initialization
+class CSSCMDL: # CSS Commandline and Commandset
+    def __init__(self, A: object, html: object): 
+        self.A = A # Alpha Instance
+        self.html = html
 
-if default_statement_config: # Paragraph Default Checking
+    def getl(self): 
+        commandline(mode='css', DockerCLS=B)
+
+
+html_commandline = HTMLCMDL(A)
+css_commandline = CSSCMDL(A, html_commandline)
+
+while 1:
+    if A.commandline_mode == 'html': 
+        getattr(html_commandline, 'getl')()
+    elif A.commandline_mode == 'css':
+        getattr(css_commandline, 'getl')()
+    else:
+        break
+
+
+if A.default_statement_config: # Paragraph Default Checking
     public_str = f'''
 <!DOCTYPE html>
-<html lang="{lang}">
+<html lang="{A.lang}">
 
 <head>
-  <meta charset="{charset}">
-  <title>{title}</title>
+  <meta charset="{A.charset}">
+  <title>{A.title}</title>
   <meta name="author" content="">
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -157,9 +220,9 @@ if default_statement_config: # Paragraph Default Checking
   <link href="css/style.css" rel="stylesheet">
 </head>
 
-<body style="background-color:{bg_color}">
+<body style="background-color:{A.bg_color}">
 
-    <p>{default_statement}</p>
+    <p>{A.default_statement}</p>
 </body>
 
 </html>
@@ -167,11 +230,11 @@ if default_statement_config: # Paragraph Default Checking
 else: 
     public_str = f'''
 <!DOCTYPE html>
-<html lang="{lang}">
+<html lang="{A.lang}">
 
 <head>
-  <meta charset="{charset}">
-  <title>{title}</title>
+  <meta charset="{A.charset}">
+  <title>{A.title}</title>
   <meta name="author" content="">
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -179,7 +242,7 @@ else:
   <link href="css/style.css" rel="stylesheet">
 </head>
 
-<body style="background-color:{bg_color}">
+<body style="background-color:{A.bg_color}">
 
 </body>
 
@@ -187,10 +250,13 @@ else:
 '''
 
 os.system('cls') # last console wipe
-save_to_file = input('<save-to-file> ') # file that the generated HTML Code gets saved to
+html_save_to_file = input('<save-to-file> ') # file that the generated HTML Code gets saved to
 
 if save_to_file == '':
     save_to_file = 'HTML_DOC.html'
+    css_save_to_file = 'HTML_DOC-STYLING.css'
+else: 
+    css_save_to_file = f'{html_save_to_file}-styling.css'
 
 if save_to_file.lower() != 'force exit': 
     try:    # exit save, force save
